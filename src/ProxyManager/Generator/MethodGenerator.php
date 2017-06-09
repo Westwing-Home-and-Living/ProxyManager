@@ -31,6 +31,12 @@ use Zend\Code\Reflection\MethodReflection;
 class MethodGenerator extends ZendMethodGenerator
 {
     /**
+     * Keep track of methods which have already been generated
+     * @var array
+     */
+    protected static $methods = [];
+
+    /**
      * @var bool
      */
     protected $returnsReference = false;
@@ -58,6 +64,10 @@ class MethodGenerator extends ZendMethodGenerator
      */
     public static function fromReflection(MethodReflection $reflectionMethod)
     {
+        if (isset(self::$methods[$reflectionMethod->class.'::'.$reflectionMethod->name])) {
+            return self::$methods[$reflectionMethod->class.'::'.$reflectionMethod->name];
+        }
+
         /* @var $method self */
         $method = new static();
 
@@ -79,6 +89,8 @@ class MethodGenerator extends ZendMethodGenerator
         $method->setName($reflectionMethod->getName());
         $method->setBody($reflectionMethod->getBody());
         $method->setReturnsReference($reflectionMethod->returnsReference());
+
+        self::$methods[$reflectionMethod->class.'::'.$reflectionMethod->name] = $method;
 
         return $method;
     }
